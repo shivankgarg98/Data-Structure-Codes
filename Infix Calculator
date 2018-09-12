@@ -1,0 +1,137 @@
+///////////////////////////
+/////SHIVANK GARG//////////
+/////Infix calculator implemented with stacks to evaluate math expressions////////
+///////////////////////////
+#include <cmath>
+#include <vector>
+#include <iostream>
+#include <stdlib.h>
+#include <string>
+#include <stack>
+using namespace std;
+ 
+int isnum(char c){
+    if(c>='0' && c <= '9'){
+        return 1;
+    }
+    return 0;
+}
+
+float calculate(char op , float num1 , float num2){
+    float ans;
+    switch(op){
+                case '+' : ans = num1 + num2 ; break;
+                case '-' : ans = num1 - num2; break;
+                case '*' : ans = num1 * num2; break;
+                case '/' : ans = num1 / num2; break;
+                case '%' : ans = (int)num1 % (int)num2; break;
+    }
+    return ans;
+}
+int unary(char c , char pre){
+    if(!isnum(pre) && (c=='+' || c == '-')){
+        if(pre != ')')
+            return 1;
+    }
+else return 0;
+}
+int order(char ch){
+    switch(ch){
+                case '(' :return -1; 
+                case '+' :return 1; 
+                case '-' : return 1; 
+                case '*' : return 2; 
+                case '/' : return 3; 
+				case '%' : return 3; 
+                case ')' : return 5;
+                default: return 0;
+           }
+}
+ char c;
+int main(){
+    int n;
+    cin >> n ;
+    string s = "0";
+    stack <float> stacknum;
+    stack <char> stackop;
+    int numi = 0;  // number of numbers
+    ///////////////////////////////////////////////////taking input
+ 
+for(int i = 0 ; i < n ; i++){
+        char pre = s[0];
+       cin >> s;
+       if(isnum(s[0])){
+           int temp = 0;
+           for(int j = 0; j < s.length() ; j++){
+               temp = 10*temp + (s[j] - '0');
+           }
+          // num[numi++] =  temp;
+          stacknum.push(temp);
+       }
+       
+       else{
+                
+                c=s[0];
+                if(unary(c,pre)){
+                    if(c=='+')
+                        continue;
+                    else if(c=='-'){
+                        stacknum.push(-1);
+                        stackop.push('*');
+                        continue;
+                    }
+                    
+                }
+                
+               if(!stackop.empty()&&c==')'){
+                    
+                   // stackop.pop();
+                    while(stacknum.size()>=2&&(stackop.empty() || stackop.top() != '(')){
+                        float num1 = stacknum.top();stacknum.pop();
+                        float num2 = stacknum.top();stacknum.pop();
+                        int op = stackop.top(); stackop.pop();
+                        stacknum.push(calculate(op , num2 ,num1));
+                    }
+                    if(stackop.top() == '(')
+                        stackop.pop();
+                    else{
+                        cout << "Malformed expression";
+                        return 0;
+                    }
+                }
+            else if(stackop.empty()||order(c)>order(stackop.top())){
+               stackop.push(c);
+            }
+            else  if(c == '(')
+                        stackop.push(c);
+          
+            else {while(stacknum.size()>=2&&(!stackop.empty()) && order(c)<=order(stackop.top())){
+                float num1 = stacknum.top();stacknum.pop();
+                float num2 = stacknum.top();stacknum.pop();
+                int op = stackop.top();stackop.pop();
+                stacknum.push(calculate(op , num2 ,num1));
+           }
+           stackop.push(c);
+           }
+       }
+    }
+
+     while(!stackop.empty()){
+                float num1 = stacknum.top();stacknum.pop();
+                if(stacknum.empty()){
+                cout << "Malformed expression";
+               return 0;
+           }
+                float num2 = stacknum.top();stacknum.pop();
+                int op = stackop.top();stackop.pop();
+                stacknum.push(calculate(op , num2 ,num1));
+           }
+           if(stacknum.size()>1 || !stackop.empty()){
+                cout << "Malformed expression";
+               return 0;
+           }
+           cout<<stacknum.top();
+    
+    return 0;
+
+}
